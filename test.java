@@ -1,14 +1,6 @@
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.sql.* ;
-
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
+import javax.swing.*;
 
 class test
 {
@@ -46,24 +38,24 @@ class test
 	
 	//the first alternative option
 	JRadioButton option1 = new JRadioButton("Select 1 from ...");
-
+	
 	//the second alternative option
 	JRadioButton option2 = new JRadioButton("Select 2 from ...");
 	
-	//the second alternative option
+	//the third alternative option
 	JRadioButton option3 = new JRadioButton("Select 3 from ...");
 		
-	//the second alternative option
+	//the fourth alternative option
 	JRadioButton option4 = new JRadioButton("Select 4 from ...");
 		
-	//the second alternative option
+	//the fifth alternative option
 	JRadioButton option5 = new JRadioButton("Select 5 from ...");
 	
-	//the second alternative option
+	//the quit alternative option
 	JRadioButton quit = new JRadioButton("Quit");
 	
 	//The button in which a user will click upon selecting one of the alternatives
-	JButton buttonSubmit = new JButton("Submit Query");	
+	JButton buttonSubmit = new JButton("Submit Query");
 	
 	ButtonGroup group = new ButtonGroup();
 	group.add(option1);
@@ -71,33 +63,27 @@ class test
 	group.add(option3);
 	group.add(option4);
 	group.add(option5);
+	group.add(quit);
 	group.add(buttonSubmit);
-	
-	
-	
-	//this will display the result of queries
-	JLabel labelResult = new JLabel("TEST RESULT");
-	labelResult.setHorizontalAlignment(JLabel.CENTER);
-	labelResult.setVerticalAlignment(JLabel.BOTTOM);
-	frame.getContentPane().add(labelResult);
 	
 	/*to modify the size of a button, label,etc. you have to create a panel
 	and add button,label,etc. to the panel.
 	*/
-	JPanel buttonPanel = new JPanel();
+	JPanel buttonPanel = new JPanel(new GridLayout(6, 1));
 	buttonPanel.add(option1);
 	buttonPanel.add(option2);
 	buttonPanel.add(option3);
 	buttonPanel.add(option4);
 	buttonPanel.add(option5);
 	buttonPanel.add(quit);
-
-	buttonPanel.add(buttonSubmit);
-	//positioning the submit button to be at the very buttom
+	JPanel submitPanel = new JPanel();
+	submitPanel.add(buttonSubmit);
+	//positioning the submit button to be at the very bottom
 	frame.getContentPane().add(buttonPanel);
+	frame.getContentPane().add(BorderLayout.PAGE_END,submitPanel);
 	
 	//the size of the frame window
-	frame.setSize(500, 200);
+	frame.setSize(500, 250);
 	//show the frame
 	frame.setVisible(true);
 
