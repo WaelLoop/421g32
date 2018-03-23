@@ -1,4 +1,6 @@
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.* ;
 import javax.swing.*;
 
@@ -31,6 +33,7 @@ class test
 	Connection con = DriverManager.getConnection (url,"cs421g32","32FourTimes") ;
 	Statement statement = con.createStatement ( );
 	
+	JFrame resultFrame ;
 	//creating the GUI Window with our group name as a title
 	JFrame frame = new JFrame("cs421g32");
 	//close the frame when the the red x button (top left corner of the frame is pressed)
@@ -57,6 +60,40 @@ class test
 	//The button in which a user will click upon selecting one of the alternatives
 	JButton buttonSubmit = new JButton("Submit Query");
 	
+	buttonSubmit.addActionListener(new ActionListener() {
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			//first alternative
+			if(option1.isSelected()){
+				
+			}
+			//second alternative
+			else if(option2.isSelected()){
+
+			}
+			//third alternative
+			else if(option3.isSelected()){
+
+			}
+			//fourth alternative
+			else if(option4.isSelected()){
+
+			}
+			//fifth alternative
+			else if(option5.isSelected()){
+
+			}
+			//quit
+			else if(quit.isSelected()){
+				frame.setVisible(false);
+				System.exit(0);
+			}
+			
+		}
+	});
+	
+	//grouping the radio buttons to prevent the user from selecting more than one radio box
 	ButtonGroup group = new ButtonGroup();
 	group.add(option1);
 	group.add(option2);
@@ -64,11 +101,9 @@ class test
 	group.add(option4);
 	group.add(option5);
 	group.add(quit);
-	group.add(buttonSubmit);
+	//group.add(buttonSubmit);
 	
-	/*to modify the size of a button, label,etc. you have to create a panel
-	and add button,label,etc. to the panel.
-	*/
+	//all the alternative options goes into a single panel with 6 rows and 1 column
 	JPanel buttonPanel = new JPanel(new GridLayout(6, 1));
 	buttonPanel.add(option1);
 	buttonPanel.add(option2);
@@ -76,10 +111,13 @@ class test
 	buttonPanel.add(option4);
 	buttonPanel.add(option5);
 	buttonPanel.add(quit);
+	//adding the panel to the window frame
+	frame.getContentPane().add(buttonPanel);
+
+	//the button has a different panel
 	JPanel submitPanel = new JPanel();
 	submitPanel.add(buttonSubmit);
 	//positioning the submit button to be at the very bottom
-	frame.getContentPane().add(buttonPanel);
 	frame.getContentPane().add(BorderLayout.PAGE_END,submitPanel);
 	
 	//the size of the frame window
@@ -87,7 +125,6 @@ class test
 	//show the frame
 	frame.setVisible(true);
 
-	
 	
 	// Finally but importantly close the statement and connection
 	statement.close ( ) ;
