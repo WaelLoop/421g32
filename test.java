@@ -40,10 +40,10 @@ class test
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	
 	//the first alternative option
-	JRadioButton option1 = new JRadioButton("Select 1 from ...");
+	JRadioButton option1 = new JRadioButton("Find the most popular book");
 	
 	//the second alternative option
-	JRadioButton option2 = new JRadioButton("Select 2 from ...");
+	JRadioButton option2 = new JRadioButton("Look up books with a certain genre");
 	
 	//the third alternative option
 	JRadioButton option3 = new JRadioButton("Select 3 from ...");
@@ -58,7 +58,7 @@ class test
 	JRadioButton quit = new JRadioButton("Quit");
 	
 	//The button in which a user will click upon selecting one of the alternatives
-	JButton buttonSubmit = new JButton("Submit Query");
+	JButton buttonSubmit = new JButton("Submit");
 	
 	buttonSubmit.addActionListener(new ActionListener() {
 		
@@ -70,7 +70,38 @@ class test
 			}
 			//second alternative
 			else if(option2.isSelected()){
-
+				//hide the alternative options frame first
+				frame.setVisible(false);
+				//creating a new frame for prompting the user to input a genre
+				JFrame option2Frame = new JFrame("Look up books with a certain genre");
+				option2Frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				
+				//label telling the user what to do
+				JLabel option2Label = new JLabel("Please input the genre");
+				option2Label.setHorizontalAlignment(JLabel.CENTER);
+				
+				//text field and its boundaries
+				JTextField inputGenre = new JTextField();
+				inputGenre.setBounds(50, 100, 50, 30);
+				
+				//button for query selection
+				JButton option2Button = new JButton("Submit query");
+				
+				//panel with a label and a text field
+				JPanel option2Panel = new JPanel(new GridLayout(3,1));
+				option2Panel.add(option2Label);
+				option2Panel.add(inputGenre);
+				option2Panel.add(option2Button);
+				
+				//add the panel to the window frame
+				//option2Frame.getContentPane().add(option2Label);
+				option2Frame.getContentPane().add(option2Panel);
+				
+				//adjusting the size and setting it visible
+				option2Frame.setSize(500, 250);
+				option2Frame.setVisible(true);
+				
+				
 			}
 			//third alternative
 			else if(option3.isSelected()){
@@ -112,7 +143,7 @@ class test
 	buttonPanel.add(option5);
 	buttonPanel.add(quit);
 	//adding the panel to the window frame
-	frame.getContentPane().add(buttonPanel);
+	frame.getContentPane().add(BorderLayout.WEST,buttonPanel);
 
 	//the button has a different panel
 	JPanel submitPanel = new JPanel();
