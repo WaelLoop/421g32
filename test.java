@@ -3,6 +3,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.* ;
 import javax.swing.*;
+import javax.swing.border.Border;
 
 class test
 {
@@ -33,7 +34,6 @@ class test
 	Connection con = DriverManager.getConnection (url,"cs421g32","32FourTimes") ;
 	Statement statement = con.createStatement ( );
 	
-	JFrame resultFrame ;
 	//creating the GUI Window with our group name as a title
 	JFrame frame = new JFrame("cs421g32");
 	//close the frame when the the red x button (top left corner of the frame is pressed)
@@ -66,6 +66,41 @@ class test
 		public void actionPerformed(ActionEvent e) {
 			//first alternative
 			if(option1.isSelected()){
+				//hide the alternative options frame first
+				frame.setVisible(false);
+				//creating a new frame to display the result of the query
+				JFrame option1ResultFrame = new JFrame("Find the most popular book");
+				option1ResultFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				option1ResultFrame.setLayout(new GridLayout(2, 1));
+				String option1Result = "test";
+				//label informing the user with the output
+				JLabel option1ResultLabel = new JLabel(option1Result);
+				
+				option1ResultLabel.setHorizontalAlignment(JLabel.CENTER);
+				//button to go back to the window frame with alternatives
+				JButton option1ResultButton = new JButton("Finish");
+				
+				JPanel option1ResultPanel = new JPanel();
+				option1ResultPanel.add(option1ResultButton);
+				
+				option1ResultFrame.getContentPane().add(option1ResultLabel);
+				option1ResultFrame.getContentPane().add(option1ResultPanel);
+				
+				//upon clicking finish
+				option1ResultButton.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						//hiding the result frame window and showing the frame window with the alternatives
+						option1ResultFrame.setVisible(false);
+						frame.setVisible(true);
+					}
+				});
+				
+				//adjusting the size and setting it visible
+				option1ResultFrame.setSize(500, 250);
+				option1ResultFrame.setVisible(true);
+				
 				
 			}
 			//second alternative
@@ -82,25 +117,75 @@ class test
 				
 				//text field and its boundaries
 				JTextField inputGenre = new JTextField();
-				inputGenre.setBounds(50, 100, 50, 30);
+				inputGenre.setPreferredSize(new Dimension(100, 25));
 				
 				//button for query selection
 				JButton option2Button = new JButton("Submit query");
 				
-				//panel with a label and a text field
-				JPanel option2Panel = new JPanel(new GridLayout(3,1));
-				option2Panel.add(option2Label);
-				option2Panel.add(inputGenre);
-				option2Panel.add(option2Button);
+				//label panel telling the user what to do
+				JPanel option2LabelPanel = new JPanel();
+				option2LabelPanel.add(option2Label);
+				//input panel where we will get the input from the user
+				JPanel option2InputPanel = new JPanel();
+				option2InputPanel.add(inputGenre);
+				//submit panel where the user will click to initiate the query
+				JPanel option2ButtonPanel = new JPanel();
+				option2ButtonPanel.add(option2Button);
+				
+				//Main panel that will hold all the panels created
+				JPanel option2MainPanel = new JPanel();
+				option2MainPanel.setLayout(new GridLayout(3, 1));
+				//adding all the panels to the main panel
+				option2MainPanel.add(option2LabelPanel);
+				option2MainPanel.add(option2InputPanel);
+				option2MainPanel.add(option2ButtonPanel);
 				
 				//add the panel to the window frame
-				//option2Frame.getContentPane().add(option2Label);
-				option2Frame.getContentPane().add(option2Panel);
+				option2Frame.getContentPane().add(option2MainPanel);
 				
 				//adjusting the size and setting it visible
 				option2Frame.setSize(500, 250);
 				option2Frame.setVisible(true);
 				
+				option2Button.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						//hiding the previous frame
+						option2Frame.setVisible(false);
+						//the result of the query window frame
+						JFrame option2ResultFrame = new JFrame("Result");
+						option2ResultFrame.setLayout(new GridLayout(2, 1));
+						frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+						
+						//get the input from the user
+						String genre = inputGenre.getText();
+						//a label with records of the query
+						JLabel option2ResultLabel = new JLabel(genre);
+						option2ResultLabel.setHorizontalAlignment(JLabel.CENTER);
+						
+						JButton option2ResultButton = new JButton("Finish");
+						JPanel option2ResultPanel = new JPanel();
+						option2ResultPanel.add(option2ResultButton);
+						//add the label to the window frame
+						option2ResultFrame.getContentPane().add(option2ResultLabel);
+						option2ResultFrame.getContentPane().add(option2ResultPanel);
+						
+						option2ResultButton.addActionListener(new ActionListener() {
+							
+							@Override
+							public void actionPerformed(ActionEvent e) {
+								//hiding the result frame window and showing the frame window with the alternatives
+								option2ResultFrame.setVisible(false);
+								frame.setVisible(true);
+							}
+						});
+						
+						//adjusting the size and setting it visible
+						option2ResultFrame.setSize(500, 250);
+						option2ResultFrame.setVisible(true);
+					}
+				});
 				
 			}
 			//third alternative
