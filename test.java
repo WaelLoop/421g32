@@ -2,37 +2,49 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.* ;
+import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.border.Border;
 
 class test
 {
+	private static String tableName;
+	private static int sqlCode;
+	private static String sqlState;
+
+	// This is the url you must use for DB2.
+	//Note: This url may not valid now !
+	private static String url;
+	private static Connection con;
+	private static Statement statement;
+
     public static void main ( String [ ] args ) throws SQLException
     {
 	// Unique table names.  Either the user supplies a unique identifier as a command line argument, or the program makes one up.
-	String tableName = "";
-        int sqlCode=0;      // Variable to hold SQLCODE
-        String sqlState="00000";  // Variable to hold SQLSTATE
+	tableName = "";
+	sqlCode=0;
+	sqlState="00000";
 
-	if ( args.length > 0 ){
-	    tableName += args [ 0 ] ;
-	}
-	else {
-	    tableName += "example3.tbl";
-	}
+	//TODO: i dont know if we need this
+//	if ( args.length > 0 ){
+//	    tableName += args [ 0 ] ;
+//	}
+//	else {
+//	    tableName += "example3.tbl";
+//	}
 
 	// Register the driver.  You must register the driver before you can use it.
         try {
 	    DriverManager.registerDriver ( new com.ibm.db2.jcc.DB2Driver() ) ;
 	} catch (Exception cnfe){
-	    System.out.println("Class not found");
+	    System.out.println("Class not found: " + cnfe);
         }
 
 	// This is the url you must use for DB2.
 	//Note: This url may not valid now !
-	String url = "jdbc:db2://comp421.cs.mcgill.ca:50000/cs421";
-	Connection con = DriverManager.getConnection (url,"cs421g32","32FourTimes") ;
-	Statement statement = con.createStatement ( );
+	url = "jdbc:db2://comp421.cs.mcgill.ca:50000/cs421";
+	con = DriverManager.getConnection (url,"cs421g32","32FourTimes") ;
+	statement = con.createStatement ( );
 	
 	//creating the GUI Window with our group name as a title
 	JFrame frame = new JFrame("cs421g32");
@@ -246,4 +258,53 @@ class test
 	statement.close ( ) ;
 	con.close ( ) ;
     }
+
+    ArrayList<ArrayList<String>> findBookName(String input) throws SQLException {
+		// Querying the book table to find the book with the name = input
+
+		ArrayList<ArrayList<String>> results = new ArrayList<ArrayList<String>>();
+
+		try {
+			String querySQL = "SELECT BOOKS.ISBN,\n" +
+					"BOOKS.BOOK_NAME,\n" +
+					"\tBOOKS.RATING\n" +
+					"FROM BOOKS\n" +
+					"LEFT JOIN BOOKSGENRE ON BOOKS.ISBN=BOOKGENRES.ISBN\n" +
+					"WHERE BOOKGENRES.GENRE_NAME = " + input + " \n" +
+					"ORDER BY BOOKS.ISBN";
+
+			System.out.println (querySQL) ;
+			java.sql.ResultSet rs = statement.executeQuery ( querySQL ) ;
+
+			while ( rs.next ( ) ) {
+				ArrayList<String> temp = new ArrayList<String>();
+
+				String id = Integer.toString(rs.getInt ( 1 )) ;
+				String name = rs.getString (2);
+				String rating = Integer.toString(rs.getInt ( 3 )) ;
+
+				temp.add(id);
+				temp.add(name);
+				temp.add(rating);
+
+				System.out.println ("id:  " + id);
+				System.out.println ("name:  " + name);
+				System.out.println("rating: " + rating);
+
+				results.add(temp);
+			}
+
+			System.out.println ("DONE");
+		} catch (SQLException e) {
+
+			sqlCode = e.getErrorCode(); // Get SQLCODE
+			sqlState = e.getSQLState(); // Get SQLSTATE
+
+			// Your code to handle errors comes here;
+			// something more meaningful than a print would be good
+			System.out.println("Code: " + sqlCode + "  sqlState: " + sqlState);
+		}
+
+		return results;
+	}
 }
