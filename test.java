@@ -37,7 +37,7 @@ class test
         JRadioButton option3 = new JRadioButton("Update a copy's status to IN and return its info using a reservation ID");
 
         //the fourth alternative option
-        JRadioButton option4 = new JRadioButton("");
+        JRadioButton option4 = new JRadioButton("Ban a Book from the library using the ISBN");
 
         //the fifth alternative option
         JRadioButton option5 = new JRadioButton("Add a new Customer");
@@ -55,7 +55,7 @@ class test
                 //first alternative
                 if(option1.isSelected()){
 
-                    ArrayList<String> results = new ArrayList<String>();
+                    ArrayList<ArrayList<String>> results = new ArrayList<ArrayList<String>>();
                     //hide the alternative options frame first
                     frame.setVisible(false);
                     //creating a new frame to display the result of the query
@@ -70,11 +70,13 @@ class test
                         System.out.println(exce.getMessage());
                     }
                     //storing data into 2D array
-                    String[][] resultData = new String[results.size()][1];
-                    String[] col = {"Book Name"};
+                    String[][] resultData = new String[results.size()][4];
+                    String[] col = {"ISBN","Book Name","Author's First Name","Author's Last Name"};
 
                     for(int i=0;i<results.size();i++){
-                        resultData[i][0] = results.get(0);
+                        for(int j=0;j<results.get(i).size();j++){
+                            resultData[i][j] = results.get(i).get(j);
+                        }
                     }
 
                     JTable table = new JTable(resultData,col);
@@ -269,7 +271,7 @@ class test
                             String ID = inputID.getText();
 
 
-                            if(validateResID(ID)){
+                            if(validateID(ID)){
 
 
                                 try{
@@ -386,16 +388,16 @@ class test
                     //hide the alternative options frame first
                     frame.setVisible(false);
                     //creating a new frame for prompting the user to input a genre
-                    JFrame option4Frame = new JFrame("Verify if a copy is IN or OUT, return copy info. If out, update to IN and return copy info");
+                    JFrame option4Frame = new JFrame("Ban a book from the library using ISBN");
                     option4Frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
                     //label telling the user what to do
-                    JLabel option4Label = new JLabel("Please input reservation id");
+                    JLabel option4Label = new JLabel("Please input the book's name");
                     option4Label.setHorizontalAlignment(JLabel.CENTER);
 
                     //text field and its boundaries
-                    JTextField inputID = new JTextField();
-                    inputID.setPreferredSize(new Dimension(50, 25));
+                    JTextField inputBookName = new JTextField();
+                    inputBookName.setPreferredSize(new Dimension(100, 25));
 
                     //button for query selection
                     JButton option4Button = new JButton("Submit query");
@@ -405,7 +407,7 @@ class test
                     option4LabelPanel.add(option4Label);
                     //input panel where we will get the input from the user
                     JPanel option4InputPanel = new JPanel();
-                    option4InputPanel.add(inputID);
+                    option4InputPanel.add(inputBookName);
                     //submit panel where the user will click to initiate the query
                     JPanel option4ButtonPanel = new JPanel();
                     option4ButtonPanel.add(option4Button);
@@ -437,9 +439,10 @@ class test
                             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
                             //get the input from the user
-                            String ID = inputID.getText();
+                            String bookName = inputBookName.getText();
                             //a label with records of the query
-                            JLabel option4ResultLabel = new JLabel(ID);
+                            JLabel option4ResultLabel = new JLabel("The book " + bookName + " has been " +
+                                    "removed from the library!");
                             option4ResultLabel.setHorizontalAlignment(JLabel.CENTER);
 
                             JButton option4ResultButton = new JButton("Finish");
@@ -881,6 +884,74 @@ class test
 
         return results;
     }
+    static ArrayList<ArrayList<String>> findMostPopularBook() throws SQLException{
+
+        //Queries book and reservations table to get the most popular book
+
+
+        String url = "jdbc:db2://comp421.cs.mcgill.ca:50000/cs421";
+        Connection con = DriverManager.getConnection (url,"cs421g32","32FourTimes") ;
+        Statement statement = con.createStatement ( );
+
+
+        ArrayList<ArrayList<String>> result = new ArrayList<ArrayList<String>>();
+
+
+        try {
+            String querySQL = "SELECT BOOKS.ISBN,\n" +
+                    "BOOKS.BOOK_NAME, AUTHORS.FIRST_NAME, AUTHORS.LAST_NAME \n" +
+                    "FROM BOOKS, AUTHORS \n" +
+                    "WHERE BOOKS.ISBN IN (\n" +
+                    "SELECT RESERVATIONS.ISBN FROM RESERVATIONS\n"+
+                    "LEFT JOIN BOOKS ON RESERVATIONS.ISBN=BOOKS.ISBN\n"+
+                    "GROUP BY RESERVATIONS.ISBN\n" +
+                    "ORDER BY COUNT(RESERVATIONS.RESERVATION_ID) DESC FETCH FIRST 1 ROWS ONLY)\n" +
+                    "AND BOOKS.AUTHOR_ID = AUTHORS.AUTHOR_ID";
+
+
+            java.sql.ResultSet rs = statement.executeQuery ( querySQL ) ;
+
+
+
+            while ( rs.next ( ) ) {
+
+                ArrayList<String> temp = new ArrayList<String>();
+
+                String isbn = rs.getString (1);
+                String bookname = rs.getString (2);
+                String firstName = rs.getString ( 3 ) ;
+                String lastName = rs.getString(4);
+
+                temp.add(isbn);
+                temp.add(bookname);
+                temp.add(firstName);
+                temp.add(lastName);
+
+                result.add(temp);
+            }
+
+            System.out.println ("DONE");
+            return result;
+
+
+        } catch (SQLException e) {
+
+            int sqlCode = e.getErrorCode(); // Get SQLCODE
+            String sqlState = e.getSQLState(); // Get SQLSTATE
+
+            // Your code to handle errors comes here;
+            // something more meaningful than a print would be good
+            System.out.println(e);
+            System.out.println("Code: " + sqlCode + "  sqlState: " + sqlState);
+        } finally {
+            // Finally but importantly close the statement and connection
+            statement.close ( ) ;
+            con.close ( ) ;
+        }
+
+        return result;
+
+    }
 
     //validate the user's input names
     public static boolean validateName(String name){
@@ -909,79 +980,13 @@ class test
         }
         return false;
     }
-    //check if an reservation_id is only int
-    public static boolean validateResID(String res_id){
+    //check if an reservation_id/ISBN is only int
+    public static boolean validateID(String res_id){
         char[] arr = res_id.toCharArray();
         for(char c : arr){
             if( Character.isAlphabetic(c)) return false;
         }
         return true;
-    }
-    static ArrayList<String> findMostPopularBook() throws SQLException{
-
-        //Queries book and reservations table to get the most popular book
-
-
-        String url = "jdbc:db2://comp421.cs.mcgill.ca:50000/cs421";
-        Connection con = DriverManager.getConnection (url,"cs421g32","32FourTimes") ;
-        Statement statement = con.createStatement ( );
-
-
-        ArrayList<String> result = new ArrayList<String>();
-
-
-        try {
-            String querySQL = "SELECT BOOKS.ISBN,\n" +
-                    "BOOKS.BOOK_NAME, AUTHORS.FIRST_NAME, AUTHORS.LAST_NAME \n" +
-                    "FROM BOOKS, AUTHORS \n" +
-                    "WHERE BOOKS.ISBN IN (\n" +
-                    "SELECT RESERVATIONS.ISBN FROM RESERVATIONS\n"+
-                    "LEFT JOIN BOOKS ON RESERVATIONS.ISBN=BOOKS.ISBN\n"+
-                    "GROUP BY RESERVATIONS.ISBN\n" +
-                    "ORDER BY COUNT(RESERVATIONS.RESERVATION_ID) DESC FETCH FIRST 1 ROWS ONLY)\n" +
-                    "AND BOOKS.AUTHOR_ID = AUTHORS.AUTHOR_ID";
-
-
-            java.sql.ResultSet rs = statement.executeQuery ( querySQL ) ;
-
-
-
-            while ( rs.next ( ) ) {
-
-                //String isbn = rs.getString (1);
-                String bookname = rs.getString (2);
-                //String firstName = rs.getString ( 3 ) ;
-                //String lastName = rs.getString(4);
-
-                //result.add(isbn);
-                result.add(bookname);
-                //result.add(firstName);
-                //result.add(lastName);
-
-
-            }
-
-            System.out.println ("DONE");
-            return result;
-
-
-        } catch (SQLException e) {
-
-            int sqlCode = e.getErrorCode(); // Get SQLCODE
-            String sqlState = e.getSQLState(); // Get SQLSTATE
-
-            // Your code to handle errors comes here;
-            // something more meaningful than a print would be good
-            System.out.println(e);
-            System.out.println("Code: " + sqlCode + "  sqlState: " + sqlState);
-        } finally {
-            // Finally but importantly close the statement and connection
-            statement.close ( ) ;
-            con.close ( ) ;
-        }
-
-        return result;
-
     }
 
 }
