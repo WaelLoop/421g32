@@ -37,7 +37,7 @@ class test
         JRadioButton option3 = new JRadioButton("Update a copy's status to IN and return its info using a reservation ID");
 
         //the fourth alternative option
-        JRadioButton option4 = new JRadioButton("Ban a Book from the library using the ISBN");
+        JRadioButton option4 = new JRadioButton("Ban a Book from the library using the book's name");
 
         //the fifth alternative option
         JRadioButton option5 = new JRadioButton("Add a new Customer");
@@ -215,7 +215,7 @@ class test
                 else if(option3.isSelected()){
                     //hide the alternative options frame first
                     frame.setVisible(false);
-                    //creating a new frame for prompting the user to input a genre
+                    //creating a new frame
                     JFrame option3Frame = new JFrame("Update a copy's status to IN and return its info using a reservation ID");
                     option3Frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -387,7 +387,7 @@ class test
                 else if(option4.isSelected()){
                     //hide the alternative options frame first
                     frame.setVisible(false);
-                    //creating a new frame for prompting the user to input a genre
+                    //creating a new frame
                     JFrame option4Frame = new JFrame("Ban a book from the library using ISBN");
                     option4Frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -440,6 +440,16 @@ class test
 
                             //get the input from the user
                             String bookName = inputBookName.getText();
+
+                            //calling the method to ban the book
+                            try {
+                                banBook(bookName);
+                            }
+                            catch(SQLException del){
+                                System.out.println("DELETE ERROR: " + del.getMessage());
+                            }
+
+
                             //a label with records of the query
                             JLabel option4ResultLabel = new JLabel("The book " + bookName + " has been " +
                                     "removed from the library!");
@@ -952,6 +962,63 @@ class test
         return result;
 
     }
+    static void banBook(String bookname) throws SQLException {
+        // Querying the book table to find the book with the genrename = input
+
+        // This is the url you must use for DB2.
+        //Note: This url may not valid now !
+        String url = "jdbc:db2://comp421.cs.mcgill.ca:50000/cs421";
+        Connection con = DriverManager.getConnection (url,"cs421g32","32FourTimes") ;
+        Statement statementSelect = con.createStatement ( );
+        Statement statementDelete = con.createStatement();
+
+        String isbn = "";
+        String querySQL;
+
+        try {
+
+            querySQL = "SELECT isbn FROM books WHERE book_name = \'"  + bookname + "\'";
+            java.sql.ResultSet rsloop = statementSelect.executeQuery(querySQL);
+            while( rsloop.next() ){
+                isbn = rsloop.getString(1);
+
+                querySQL = "DELETE FROM reservations WHERE isbn=\'" + isbn + "\'";
+                statementDelete.executeUpdate ( querySQL ) ;
+                System.out.println("Successfully removed books with ISBN = " + isbn + " from RESERVATIONS table");
+
+                querySQL = "DELETE FROM copies WHERE isbn=\'" + isbn + "\'";
+                statementDelete.executeUpdate ( querySQL ) ;
+                System.out.println("Successfully removed books with ISBN = " + isbn + " from COPIES table");
+
+                querySQL = "DELETE FROM booksgenres WHERE isbn=\'" + isbn + "\'";
+                statementDelete.executeUpdate ( querySQL ) ;
+                System.out.println("Successfully removed books with ISBN = " + isbn + " from BOOKSGENRES table");
+
+                querySQL = "DELETE FROM books WHERE isbn=\'" + isbn + "\'";
+                statementDelete.executeUpdate ( querySQL ) ;
+                System.out.println("Successfully removed books with ISBN = " + isbn + " from BOOKS table");
+
+            }
+
+            System.out.println ("DONE");
+
+
+        } catch (SQLException e) {
+
+            int sqlCode = e.getErrorCode(); // Get SQLCODE
+            String sqlState = e.getSQLState(); // Get SQLSTATE
+
+            // Your code to handle errors comes here;
+            // something more meaningful than a print would be good
+            System.out.println(e);
+            System.out.println("Code: " + sqlCode + "  sqlState: " + sqlState);
+        } finally {
+            // Finally but importantly close the statement and connection
+            statementSelect.close ( ) ;
+            statementDelete.close();
+            con.close ( ) ;
+        }
+    }
 
     //validate the user's input names
     public static boolean validateName(String name){
@@ -988,5 +1055,4 @@ class test
         }
         return true;
     }
-
 }
