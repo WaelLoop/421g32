@@ -34,7 +34,7 @@ class test
         JRadioButton option2 = new JRadioButton("Look up books with a certain genre");
 
         //the third alternative option
-        JRadioButton option3 = new JRadioButton("Verify if a copy is IN or OUT, return copy info. If out, update to IN and return copy info");
+        JRadioButton option3 = new JRadioButton("Update a copy's status to IN and return its info using a reservation ID");
 
         //the fourth alternative option
         JRadioButton option4 = new JRadioButton("");
@@ -54,24 +54,40 @@ class test
             public void actionPerformed(ActionEvent e) {
                 //first alternative
                 if(option1.isSelected()){
+
+                    ArrayList<String> results = new ArrayList<String>();
                     //hide the alternative options frame first
                     frame.setVisible(false);
                     //creating a new frame to display the result of the query
                     JFrame option1ResultFrame = new JFrame("Find the most popular book");
                     option1ResultFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                     option1ResultFrame.setLayout(new GridLayout(2, 1));
-                    String option1Result = "test";
-                    //label informing the user with the output
-                    JLabel option1ResultLabel = new JLabel(option1Result);
 
-                    option1ResultLabel.setHorizontalAlignment(JLabel.CENTER);
+                    try{
+                        results = findMostPopularBook();
+                    }
+                    catch(SQLException exce){
+                        System.out.println(exce.getMessage());
+                    }
+                    //storing data into 2D array
+                    String[][] resultData = new String[results.size()][1];
+                    String[] col = {"Book Name"};
+
+                    for(int i=0;i<results.size();i++){
+                        resultData[i][0] = results.get(0);
+                    }
+
+                    JTable table = new JTable(resultData,col);
+                    JScrollPane pane = new JScrollPane(table);
+                    table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
                     //button to go back to the window frame with alternatives
                     JButton option1ResultButton = new JButton("Finish");
 
                     JPanel option1ResultPanel = new JPanel();
                     option1ResultPanel.add(option1ResultButton);
 
-                    option1ResultFrame.getContentPane().add(option1ResultLabel);
+                    option1ResultFrame.getContentPane().add(pane);
                     option1ResultFrame.getContentPane().add(option1ResultPanel);
 
                     //upon clicking finish
@@ -198,7 +214,7 @@ class test
                     //hide the alternative options frame first
                     frame.setVisible(false);
                     //creating a new frame for prompting the user to input a genre
-                    JFrame option3Frame = new JFrame("Verify if a copy is IN or OUT, return copy info. If out, update to IN and return copy info");
+                    JFrame option3Frame = new JFrame("Update a copy's status to IN and return its info using a reservation ID");
                     option3Frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
                     //label telling the user what to do
@@ -241,6 +257,7 @@ class test
 
                         @Override
                         public void actionPerformed(ActionEvent e) {
+                            ArrayList<ArrayList<String>> results = new ArrayList<ArrayList<String>>();
                             //hiding the previous frame
                             option3Frame.setVisible(false);
                             //the result of the query window frame
@@ -252,31 +269,115 @@ class test
                             String ID = inputID.getText();
 
 
+                            if(validateResID(ID)){
 
-                            //a label with records of the query
-                            JLabel option3ResultLabel = new JLabel("");
-                            option3ResultLabel.setHorizontalAlignment(JLabel.CENTER);
 
-                            JButton option3ResultButton = new JButton("Finish");
-                            JPanel option3ResultPanel = new JPanel();
-                            option3ResultPanel.add(option3ResultButton);
-                            //add the label to the window frame
-                            option3ResultFrame.getContentPane().add(option3ResultLabel);
-                            option3ResultFrame.getContentPane().add(option3ResultPanel);
-
-                            option3ResultButton.addActionListener(new ActionListener() {
-
-                                @Override
-                                public void actionPerformed(ActionEvent e) {
-                                    //hiding the result frame window and showing the frame window with the alternatives
-                                    option3ResultFrame.setVisible(false);
-                                    frame.setVisible(true);
+                                try{
+                                    results = returnBook(ID);
+                                } catch (java.sql.SQLException sqle) {
+                                    System.out.println("SQLEXCEPTION: " + sqle);
                                 }
-                            });
+                                //array for each field
+                                String[] isbn = new String[results.size()];
+                                String[] copy_no = new String[results.size()];
+                                String[] library_id = new String[results.size()];
+                                String[] status = new String[results.size()];
 
-                            //adjusting the size and setting it visible
-                            option3ResultFrame.setSize(700, 250);
-                            option3ResultFrame.setVisible(true);
+                                //putting the data into their respective arrays
+                                for(int i=0;i<results.size();i++){
+                                    isbn[i] = results.get(i).get(0);
+                                    copy_no[i] = results.get(i).get(1);
+                                    library_id[i] = results.get(i).get(2);
+                                    status[i] = results.get(i).get(3);
+                                }
+
+                                //checking copies' status
+                                for(int i = 0;i<status.length;i++){
+                                    //if its status is out, then update to IN, otherwise do nothing
+                                    if(status[i].equals("OUT")){
+                                        try{
+                                            updateCopyStatus(isbn[i],copy_no[i]);
+                                        }
+                                        catch(SQLException upda){
+                                            System.out.println("ERROR UPDATING: " + upda.getMessage());
+                                        }
+                                    }
+                                }
+
+                                //our JTable data
+                                String[] col = {"ISBN","Copy No.","Library ID","Status"};
+                                String[][] copiesData = new String[results.size()][4];
+
+                                //finally retreive the info after the update
+                                try{
+                                    results = returnBook(ID);
+                                } catch (java.sql.SQLException sqle) {
+                                    System.out.println("SQLEXCEPTION: " + sqle);
+                                }
+
+                                //populate the table(copiesData) "array"
+                                for(int i=0;i<results.size();i++){
+                                    for(int j=0;j<results.get(i).size();j++){
+                                        copiesData[i][j] = results.get(i).get(j);
+                                    }
+                                }
+
+
+
+                                //table with copies' info
+                                JTable copiesTable = new JTable(copiesData,col);
+                                JScrollPane scrollPane = new JScrollPane(copiesTable);
+                                copiesTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
+
+                                JButton option3ResultButton = new JButton("Finish");
+                                JPanel option3ResultPanel = new JPanel();
+                                option3ResultPanel.add(option3ResultButton);
+                                //add the label to the window frame
+                                option3ResultFrame.getContentPane().add(scrollPane);
+                                option3ResultFrame.getContentPane().add(option3ResultPanel);
+
+                                option3ResultButton.addActionListener(new ActionListener() {
+
+                                    @Override
+                                    public void actionPerformed(ActionEvent e) {
+                                        //hiding the result frame window and showing the frame window with the alternatives
+                                        option3ResultFrame.setVisible(false);
+                                        frame.setVisible(true);
+                                    }
+                                });
+
+                                //adjusting the size and setting it visible
+                                option3ResultFrame.setSize(700, 250);
+                                option3ResultFrame.setVisible(true);
+                            }
+                            else {
+                                JLabel option3ResultLabel = new JLabel("An Error has occured. Make sure your " +
+                                        "reservation ID contains nothing but integers");
+                                //centering the label
+                                option3ResultLabel.setHorizontalAlignment(JLabel.CENTER);
+                                //button to return to the main input frame
+                                JButton option3ResultButton = new JButton("OK");
+                                JPanel option3ResultPanel = new JPanel();
+                                option3ResultPanel.add(option3ResultButton);
+                                //add the label to the window frame
+                                option3ResultFrame.getContentPane().add(option3ResultLabel);
+                                option3ResultFrame.getContentPane().add(option3ResultPanel);
+
+                                option3ResultButton.addActionListener(new ActionListener() {
+
+                                    @Override
+                                    public void actionPerformed(ActionEvent e) {
+                                        //hiding the result frame window and showing the frame window with the alternatives
+                                        option3ResultFrame.setVisible(false);
+                                        option3Frame.setVisible(true);
+                                    }
+                                });
+
+                                //adjusting the size and setting it visible
+                                option3ResultFrame.setSize(700, 250);
+                                option3ResultFrame.setVisible(true);
+                            }
                         }
                     });
                 }
@@ -575,8 +676,8 @@ class test
 //        con.close ( ) ;
     }
 
-    static ArrayList<ArrayList<String>> updateCopyStatus(String res_id) throws SQLException {
-        // Querying the book table to find the book with the genrename = input
+    static ArrayList<ArrayList<String>> updateCopyStatus(String isbn,String copy_no) throws SQLException {
+        // updating the copies table, setting their status to IN
 
         // This is the url you must use for DB2.
         //Note: This url may not valid now !
@@ -590,34 +691,12 @@ class test
         ArrayList<ArrayList<String>> results = new ArrayList<ArrayList<String>>();
 
         try {
-            String querySQL = "SELECT BOOKS.ISBN,\n" +
-                    "BOOKS.BOOK_NAME,\n" +
-                    "\tBOOKS.RATING\n" +
-                    "FROM BOOKS\n" +
-                    "LEFT JOIN BOOKSGENRES ON BOOKS.ISBN=BOOKSGENRES.ISBN\n" +
-                    "WHERE BOOKSGENRES.GENRE_NAME = \'" + res_id + "\'\n" +
-                    "ORDER BY BOOKS.ISBN";
+            String querySQL = "UPDATE COPIES\n" + "SET STATUS=\'IN\'\n" +
+                    "WHERE ISBN=\'" + isbn + "\'AND COPY_NO=" + copy_no;
 
 //			System.out.println (querySQL) ;
-            java.sql.ResultSet rs = statement.executeQuery ( querySQL ) ;
+            statement.executeUpdate ( querySQL ) ;
 
-            while ( rs.next ( ) ) {
-                ArrayList<String> temp = new ArrayList<String>();
-
-                String id = rs.getString (1);
-                String name = rs.getString (2);
-                String rating = Integer.toString(rs.getInt ( 3 )) ;
-
-                temp.add(id);
-                temp.add(name);
-                temp.add(rating);
-
-//				System.out.println ("id:  " + id);
-//				System.out.println ("name:  " + name);
-//				System.out.println("rating: " + rating);
-
-                results.add(temp);
-            }
 
             System.out.println ("DONE");
         } catch (SQLException e) {
@@ -627,7 +706,7 @@ class test
 
             // Your code to handle errors comes here;
             // something more meaningful than a print would be good
-            System.out.println(e);
+            System.out.println("UPDATE ERROR: "+ e);
             System.out.println("Code: " + sqlCode + "  sqlState: " + sqlState);
         } finally {
             // Finally but importantly close the statement and connection
@@ -701,7 +780,7 @@ class test
     }
 
     static ArrayList<ArrayList<String>> returnBook(String input) throws SQLException {
-        // Querying the book table to find the book with the genrename = input
+        // Querying the copies table, getting their isbn, copy_no, status and library_id
 
         // This is the url you must use for DB2.
         //Note: This url may not valid now !
@@ -746,6 +825,8 @@ class test
                 System.out.println ("copy_no:  " + copy_no);
                 System.out.println("library_id: " + library_id);
                 System.out.println("status: " + status);
+
+                results.add(temp);
             }
 
             statement = con.createStatement ( );
@@ -835,6 +916,72 @@ class test
             if( Character.isAlphabetic(c)) return false;
         }
         return true;
+    }
+    static ArrayList<String> findMostPopularBook() throws SQLException{
+
+        //Queries book and reservations table to get the most popular book
+
+
+        String url = "jdbc:db2://comp421.cs.mcgill.ca:50000/cs421";
+        Connection con = DriverManager.getConnection (url,"cs421g32","32FourTimes") ;
+        Statement statement = con.createStatement ( );
+
+
+        ArrayList<String> result = new ArrayList<String>();
+
+
+        try {
+            String querySQL = "SELECT BOOKS.ISBN,\n" +
+                    "BOOKS.BOOK_NAME, AUTHORS.FIRST_NAME, AUTHORS.LAST_NAME \n" +
+                    "FROM BOOKS, AUTHORS \n" +
+                    "WHERE BOOKS.ISBN IN (\n" +
+                    "SELECT RESERVATIONS.ISBN FROM RESERVATIONS\n"+
+                    "LEFT JOIN BOOKS ON RESERVATIONS.ISBN=BOOKS.ISBN\n"+
+                    "GROUP BY RESERVATIONS.ISBN\n" +
+                    "ORDER BY COUNT(RESERVATIONS.RESERVATION_ID) DESC FETCH FIRST 1 ROWS ONLY)\n" +
+                    "AND BOOKS.AUTHOR_ID = AUTHORS.AUTHOR_ID";
+
+
+            java.sql.ResultSet rs = statement.executeQuery ( querySQL ) ;
+
+
+
+            while ( rs.next ( ) ) {
+
+                //String isbn = rs.getString (1);
+                String bookname = rs.getString (2);
+                //String firstName = rs.getString ( 3 ) ;
+                //String lastName = rs.getString(4);
+
+                //result.add(isbn);
+                result.add(bookname);
+                //result.add(firstName);
+                //result.add(lastName);
+
+
+            }
+
+            System.out.println ("DONE");
+            return result;
+
+
+        } catch (SQLException e) {
+
+            int sqlCode = e.getErrorCode(); // Get SQLCODE
+            String sqlState = e.getSQLState(); // Get SQLSTATE
+
+            // Your code to handle errors comes here;
+            // something more meaningful than a print would be good
+            System.out.println(e);
+            System.out.println("Code: " + sqlCode + "  sqlState: " + sqlState);
+        } finally {
+            // Finally but importantly close the statement and connection
+            statement.close ( ) ;
+            con.close ( ) ;
+        }
+
+        return result;
+
     }
 
 }
