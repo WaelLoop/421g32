@@ -8,22 +8,11 @@ import javax.swing.border.Border;
 
 class test
 {
-	private static String tableName;
-	private static int sqlCode;
-	private static String sqlState;
 
-	// This is the url you must use for DB2.
-	//Note: This url may not valid now !
-	private static String url;
-	private static Connection con;
-	private static Statement statement;
 
     public static void main ( String [ ] args ) throws SQLException
     {
 	// Unique table names.  Either the user supplies a unique identifier as a command line argument, or the program makes one up.
-	tableName = "";
-	sqlCode=0;
-	sqlState="00000";
 
 	//TODO: i dont know if we need this
 //	if ( args.length > 0 ){
@@ -39,12 +28,6 @@ class test
 	} catch (Exception cnfe){
 	    System.out.println("Class not found: " + cnfe);
         }
-
-	// This is the url you must use for DB2.
-	//Note: This url may not valid now !
-	url = "jdbc:db2://comp421.cs.mcgill.ca:50000/cs421";
-	con = DriverManager.getConnection (url,"cs421g32","32FourTimes") ;
-	statement = con.createStatement ( );
 	
 	//creating the GUI Window with our group name as a title
 	JFrame frame = new JFrame("cs421g32");
@@ -172,6 +155,12 @@ class test
 						
 						//get the input from the user
 						String genre = inputGenre.getText();
+						try{
+							ArrayList<ArrayList<String>> results = findByGenre(genre);
+						} catch (java.sql.SQLException sqle) {
+							System.out.println("SQLEXCEPtion: " + sqle);
+						}
+
 						//a label with records of the query
 						JLabel option2ResultLabel = new JLabel(genre);
 						option2ResultLabel.setHorizontalAlignment(JLabel.CENTER);
@@ -253,14 +242,19 @@ class test
 	//show the frame
 	frame.setVisible(true);
 
-	
-	// Finally but importantly close the statement and connection
-	statement.close ( ) ;
-	con.close ( ) ;
     }
 
-    ArrayList<ArrayList<String>> findBookName(String input) throws SQLException {
-		// Querying the book table to find the book with the name = input
+    static ArrayList<ArrayList<String>> findByGenre(String input) throws SQLException {
+		// Querying the book table to find the book with the genrename = input
+
+		// This is the url you must use for DB2.
+		//Note: This url may not valid now !
+		String url = "jdbc:db2://comp421.cs.mcgill.ca:50000/cs421";
+		Connection con = DriverManager.getConnection (url,"cs421g32","32FourTimes") ;
+		Statement statement = con.createStatement ( );
+
+		// This is the url you must use for DB2.
+		//Note: This url may not valid now !
 
 		ArrayList<ArrayList<String>> results = new ArrayList<ArrayList<String>>();
 
@@ -269,17 +263,17 @@ class test
 					"BOOKS.BOOK_NAME,\n" +
 					"\tBOOKS.RATING\n" +
 					"FROM BOOKS\n" +
-					"LEFT JOIN BOOKSGENRE ON BOOKS.ISBN=BOOKGENRES.ISBN\n" +
-					"WHERE BOOKGENRES.GENRE_NAME = " + input + " \n" +
+					"LEFT JOIN BOOKSGENRES ON BOOKS.ISBN=BOOKSGENRES.ISBN\n" +
+					"WHERE BOOKSGENRES.GENRE_NAME = \'" + input + "\'\n" +
 					"ORDER BY BOOKS.ISBN";
 
-			System.out.println (querySQL) ;
+//			System.out.println (querySQL) ;
 			java.sql.ResultSet rs = statement.executeQuery ( querySQL ) ;
 
 			while ( rs.next ( ) ) {
 				ArrayList<String> temp = new ArrayList<String>();
 
-				String id = Integer.toString(rs.getInt ( 1 )) ;
+				String id = rs.getString (1);
 				String name = rs.getString (2);
 				String rating = Integer.toString(rs.getInt ( 3 )) ;
 
@@ -287,9 +281,9 @@ class test
 				temp.add(name);
 				temp.add(rating);
 
-				System.out.println ("id:  " + id);
-				System.out.println ("name:  " + name);
-				System.out.println("rating: " + rating);
+//				System.out.println ("id:  " + id);
+//				System.out.println ("name:  " + name);
+//				System.out.println("rating: " + rating);
 
 				results.add(temp);
 			}
@@ -297,12 +291,118 @@ class test
 			System.out.println ("DONE");
 		} catch (SQLException e) {
 
-			sqlCode = e.getErrorCode(); // Get SQLCODE
-			sqlState = e.getSQLState(); // Get SQLSTATE
+			int sqlCode = e.getErrorCode(); // Get SQLCODE
+			String sqlState = e.getSQLState(); // Get SQLSTATE
 
 			// Your code to handle errors comes here;
 			// something more meaningful than a print would be good
+			System.out.println(e);
 			System.out.println("Code: " + sqlCode + "  sqlState: " + sqlState);
+		} finally {
+			// Finally but importantly close the statement and connection
+			statement.close ( ) ;
+			con.close ( ) ;
+		}
+
+		return results;
+	}
+
+	static ArrayList<ArrayList<String>> returnBook(String input) throws SQLException {
+		// Querying the book table to find the book with the genrename = input
+
+		// This is the url you must use for DB2.
+		//Note: This url may not valid now !
+		String url = "jdbc:db2://comp421.cs.mcgill.ca:50000/cs421";
+		Connection con = DriverManager.getConnection (url,"cs421g32","32FourTimes") ;
+		Statement statement = con.createStatement ( );
+
+		// This is the url you must use for DB2.
+		//Note: This url may not valid now !
+
+		ArrayList<ArrayList<String>> results = new ArrayList<ArrayList<String>>();
+
+		try {
+			String querySQL = "SELECT COPIES.ISBN,\n" +
+					"\tCOPIES.COPY_NO,\n" +
+					"\tCOPIES.LIBRARY_ID,\n" +
+					"\tCOPIES.STATUS\n" +
+					"FROM COPIES\n" +
+					"LEFT JOIN RESERVATIONS ON RESERVATIONS.ISBN=COPIES.ISBN AND RESERVATIONS.COPY_NO=COPIES.COPY_NO\n" +
+					"WHERE RESERVATIONS.RESERVATION_ID= " + input;
+
+//			System.out.println (querySQL) ;
+			java.sql.ResultSet rs = statement.executeQuery ( querySQL ) ;
+
+			String id = "", copy_no = "", library_id = "", status = "";
+
+			ArrayList<String> temp = new ArrayList<String>();
+
+			while ( rs.next ( ) ) {
+
+				id = rs.getString (1);
+				copy_no = Integer.toString(rs.getInt ( 2 )) ;
+				library_id = Integer.toString(rs.getInt ( 3 )) ;
+				status = rs.getString (4);
+
+				temp.add(id);
+				temp.add(copy_no);
+				temp.add(library_id);
+				temp.add(status);
+
+				System.out.println ("id:  " + id);
+				System.out.println ("copy_no:  " + copy_no);
+				System.out.println("library_id: " + library_id);
+				System.out.println("status: " + status);
+			}
+
+			statement = con.createStatement ( );
+
+//			if (status.equals("OUT")) {
+//				String querySQL = "UPDATE COPIES\n" +
+//						"SET STATUS= \'IN\' \n" +
+//						"WHERE COPY_ISBN={{input isbn}} AND COPY_NO={{input copy_no}}";
+//
+////			System.out.println (querySQL) ;
+//				java.sql.ResultSet rs = statement.executeQuery ( querySQL ) ;
+//
+//				String id = "", copy_no = "", library_id = "", status = "";
+//
+//				ArrayList<String> temp = new ArrayList<String>();
+//
+//				while ( rs.next ( ) ) {
+//
+//					id = rs.getString (1);
+//					copy_no = Integer.toString(rs.getInt ( 2 )) ;
+//					library_id = Integer.toString(rs.getInt ( 3 )) ;
+//					status = rs.getString (4);
+//
+//					temp.add(id);
+//					temp.add(copy_no);
+//					temp.add(library_id);
+//					temp.add(status);
+//
+//					System.out.println ("id:  " + id);
+//					System.out.println ("copy_no:  " + copy_no);
+//					System.out.println("library_id: " + library_id);
+//					System.out.println("status: " + status);
+//				}
+//			}
+
+
+			System.out.println ("DONE");
+		} catch (SQLException e) {
+
+			int sqlCode = e.getErrorCode(); // Get SQLCODE
+			String sqlState = e.getSQLState(); // Get SQLSTATE
+
+			// Your code to handle errors comes here;
+			// something more meaningful than a print would be good
+			System.out.println(e);
+			System.out.println("Code: " + sqlCode + "  sqlState: " + sqlState);
+		} finally {
+			// Finally but importantly close the statement and connection
+			statement.close ( ) ;
+			con.close ( ) ;
 		}
 
 		return results;
