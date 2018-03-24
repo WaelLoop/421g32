@@ -46,13 +46,13 @@ class test
 	JRadioButton option2 = new JRadioButton("Look up books with a certain genre");
 	
 	//the third alternative option
-	JRadioButton option3 = new JRadioButton("Select 3 from ...");
+	JRadioButton option3 = new JRadioButton("Verify if a copy is IN or OUT, return copy info. If out, update to IN and return copy info");
 		
 	//the fourth alternative option
-	JRadioButton option4 = new JRadioButton("Select 4 from ...");
+	JRadioButton option4 = new JRadioButton("");
 		
 	//the fifth alternative option
-	JRadioButton option5 = new JRadioButton("Select 5 from ...");
+	JRadioButton option5 = new JRadioButton("Add a new Customer");
 	
 	//the quit alternative option
 	JRadioButton quit = new JRadioButton("Quit");
@@ -98,7 +98,7 @@ class test
 				});
 				
 				//adjusting the size and setting it visible
-				option1ResultFrame.setSize(500, 250);
+				option1ResultFrame.setSize(700, 250);
 				option1ResultFrame.setVisible(true);
 				
 				
@@ -144,7 +144,7 @@ class test
 				option2Frame.getContentPane().add(option2MainPanel);
 				
 				//adjusting the size and setting it visible
-				option2Frame.setSize(500, 250);
+				option2Frame.setSize(700, 250);
 				option2Frame.setVisible(true);
 				
 				option2Button.addActionListener(new ActionListener() {
@@ -182,7 +182,7 @@ class test
 						});
 						
 						//adjusting the size and setting it visible
-						option2ResultFrame.setSize(500, 250);
+						option2ResultFrame.setSize(700, 250);
 						option2ResultFrame.setVisible(true);
 					}
 				});
@@ -190,15 +190,289 @@ class test
 			}
 			//third alternative
 			else if(option3.isSelected()){
-
+				//hide the alternative options frame first
+				frame.setVisible(false);
+				//creating a new frame for prompting the user to input a genre
+				JFrame option3Frame = new JFrame("Verify if a copy is IN or OUT, return copy info. If out, update to IN and return copy info");
+				option3Frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				
+				//label telling the user what to do
+				JLabel option3Label = new JLabel("Please input reservation id");
+				option3Label.setHorizontalAlignment(JLabel.CENTER);
+				
+				//text field and its boundaries
+				JTextField inputID = new JTextField();
+				inputID.setPreferredSize(new Dimension(50, 25));
+				
+				//button for query selection
+				JButton option3Button = new JButton("Submit query");
+				
+				//label panel telling the user what to do
+				JPanel option3LabelPanel = new JPanel();
+				option3LabelPanel.add(option3Label);
+				//input panel where we will get the input from the user
+				JPanel option3InputPanel = new JPanel();
+				option3InputPanel.add(inputID);
+				//submit panel where the user will click to initiate the query
+				JPanel option3ButtonPanel = new JPanel();
+				option3ButtonPanel.add(option3Button);
+				
+				//Main panel that will hold all the panels created
+				JPanel option3MainPanel = new JPanel();
+				option3MainPanel.setLayout(new GridLayout(3, 1));
+				//adding all the panels to the main panel
+				option3MainPanel.add(option3LabelPanel);
+				option3MainPanel.add(option3InputPanel);
+				option3MainPanel.add(option3ButtonPanel);
+				
+				//add the panel to the window frame
+				option3Frame.getContentPane().add(option3MainPanel);
+				
+				//adjusting the size and setting it visible
+				option3Frame.setSize(700, 250);
+				option3Frame.setVisible(true);
+				
+				option3Button.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						//hiding the previous frame
+						option3Frame.setVisible(false);
+						//the result of the query window frame
+						JFrame option3ResultFrame = new JFrame("Result");
+						option3ResultFrame.setLayout(new GridLayout(2, 1));
+						frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+						
+						//get the input from the user
+						char[] ID = inputID.getText().toCharArray();
+						for(char c : ID){
+							if (!Character.isDigit(c)){
+								
+							}
+						}
+						//a label with records of the query
+						JLabel option3ResultLabel = new JLabel("");
+						option3ResultLabel.setHorizontalAlignment(JLabel.CENTER);
+						
+						JButton option3ResultButton = new JButton("Finish");
+						JPanel option3ResultPanel = new JPanel();
+						option3ResultPanel.add(option3ResultButton);
+						//add the label to the window frame
+						option3ResultFrame.getContentPane().add(option3ResultLabel);
+						option3ResultFrame.getContentPane().add(option3ResultPanel);
+						
+						option3ResultButton.addActionListener(new ActionListener() {
+							
+							@Override
+							public void actionPerformed(ActionEvent e) {
+								//hiding the result frame window and showing the frame window with the alternatives
+								option3ResultFrame.setVisible(false);
+								frame.setVisible(true);
+							}
+						});
+						
+						//adjusting the size and setting it visible
+						option3ResultFrame.setSize(700, 250);
+						option3ResultFrame.setVisible(true);
+					}
+				});
 			}
 			//fourth alternative
 			else if(option4.isSelected()){
-
+				//hide the alternative options frame first
+				frame.setVisible(false);
+				//creating a new frame for prompting the user to input a genre
+				JFrame option4Frame = new JFrame("Verify if a copy is IN or OUT, return copy info. If out, update to IN and return copy info");
+				option4Frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				
+				//label telling the user what to do
+				JLabel option4Label = new JLabel("Please input reservation id");
+				option4Label.setHorizontalAlignment(JLabel.CENTER);
+				
+				//text field and its boundaries
+				JTextField inputID = new JTextField();
+				inputID.setPreferredSize(new Dimension(50, 25));
+				
+				//button for query selection
+				JButton option4Button = new JButton("Submit query");
+				
+				//label panel telling the user what to do
+				JPanel option4LabelPanel = new JPanel();
+				option4LabelPanel.add(option4Label);
+				//input panel where we will get the input from the user
+				JPanel option4InputPanel = new JPanel();
+				option4InputPanel.add(inputID);
+				//submit panel where the user will click to initiate the query
+				JPanel option4ButtonPanel = new JPanel();
+				option4ButtonPanel.add(option4Button);
+				
+				//Main panel that will hold all the panels created
+				JPanel option4MainPanel = new JPanel();
+				option4MainPanel.setLayout(new GridLayout(3, 1));
+				//adding all the panels to the main panel
+				option4MainPanel.add(option4LabelPanel);
+				option4MainPanel.add(option4InputPanel);
+				option4MainPanel.add(option4ButtonPanel);
+				
+				//add the panel to the window frame
+				option4Frame.getContentPane().add(option4MainPanel);
+				
+				//adjusting the size and setting it visible
+				option4Frame.setSize(700, 250);
+				option4Frame.setVisible(true);
+				
+				option4Button.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						//hiding the previous frame
+						option4Frame.setVisible(false);
+						//the result of the query window frame
+						JFrame option4ResultFrame = new JFrame("Result");
+						option4ResultFrame.setLayout(new GridLayout(2, 1));
+						frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+						
+						//get the input from the user
+						String ID = inputID.getText();
+						//a label with records of the query
+						JLabel option4ResultLabel = new JLabel(ID);
+						option4ResultLabel.setHorizontalAlignment(JLabel.CENTER);
+						
+						JButton option4ResultButton = new JButton("Finish");
+						JPanel option4ResultPanel = new JPanel();
+						option4ResultPanel.add(option4ResultButton);
+						//add the label to the window frame
+						option4ResultFrame.getContentPane().add(option4ResultLabel);
+						option4ResultFrame.getContentPane().add(option4ResultPanel);
+						
+						option4ResultButton.addActionListener(new ActionListener() {
+							
+							@Override
+							public void actionPerformed(ActionEvent e) {
+								//hiding the result frame window and showing the frame window with the alternatives
+								option4ResultFrame.setVisible(false);
+								frame.setVisible(true);
+							}
+						});
+						
+						//adjusting the size and setting it visible
+						option4ResultFrame.setSize(700, 250);
+						option4ResultFrame.setVisible(true);
+					}
+				});
 			}
 			//fifth alternative
 			else if(option5.isSelected()){
-
+				//hide the alternative options frame first
+				frame.setVisible(false);
+				//creating a new frame for prompting the user to input a genre
+				JFrame option5Frame = new JFrame("Add a new customer");
+				option5Frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+				
+				//label telling the user what to do
+				JLabel option5LabelFN = new JLabel("Please input your first name");
+				option5LabelFN.setHorizontalAlignment(JLabel.LEFT);
+				JLabel option5LabelLN = new JLabel("Please input your last name");
+				option5LabelLN.setHorizontalAlignment(JLabel.LEFT);
+				JLabel option5LabelPN = new JLabel("Please input your phone number");
+				option5LabelPN.setHorizontalAlignment(JLabel.LEFT);
+				JLabel option5LabelEA = new JLabel("Please input your email address");
+				option5LabelEA.setHorizontalAlignment(JLabel.LEFT);
+				JLabel option5LabelPA = new JLabel("Please input your physical address");
+				option5LabelPA.setHorizontalAlignment(JLabel.LEFT);
+				
+				//text field and its boundaries
+				JTextField option5FN = new JTextField();
+				option5FN.setPreferredSize(new Dimension(50, 25));
+				option5FN.setHorizontalAlignment(JTextField.RIGHT);
+				JTextField option5LN = new JTextField();
+				option5LN.setPreferredSize(new Dimension(50, 25));
+				option5LN.setHorizontalAlignment(JTextField.RIGHT);
+				JTextField option5PN = new JTextField();
+				option5PN.setPreferredSize(new Dimension(50, 25));
+				option5PN.setHorizontalAlignment(JTextField.RIGHT);
+				JTextField option5EA = new JTextField();
+				option5EA.setPreferredSize(new Dimension(50, 25));
+				option5EA.setHorizontalAlignment(JTextField.RIGHT);
+				JTextField option5PA = new JTextField();
+				option5PA.setPreferredSize(new Dimension(50, 25));
+				option5PA.setHorizontalAlignment(JTextField.RIGHT);
+				
+				//button for query selection
+				JButton option5Button = new JButton("Submit query");
+				
+				//label panel telling the user what to do
+				JPanel option5LabelPanel = new JPanel();
+				option5LabelPanel.add(option5LabelFN);
+				option5LabelPanel.add(option5LabelLN);
+				option5LabelPanel.add(option5LabelPN);
+				option5LabelPanel.add(option5LabelEA);
+				option5LabelPanel.add(option5LabelPA);
+				//input panel where we will get the input from the user
+				JPanel option5InputPanel = new JPanel();
+				option5InputPanel.add(option5FN);
+				option5InputPanel.add(option5LN);
+				option5InputPanel.add(option5PN);
+				option5InputPanel.add(option5EA);
+				option5InputPanel.add(option5PA);
+				//submit panel where the user will click to initiate the query
+				JPanel option5ButtonPanel = new JPanel();
+				option5ButtonPanel.add(option5Button);
+				
+				//Main panel that will hold all the panels created
+				JPanel option5MainPanel = new JPanel();
+				option5MainPanel.setLayout(new GridLayout(3, 1));
+				//adding all the panels to the main panel
+				option5MainPanel.add(option5LabelPanel);
+				option5MainPanel.add(option5InputPanel);
+				option5MainPanel.add(option5ButtonPanel);
+				
+				//add the panel to the window frame
+				option5Frame.getContentPane().add(option5MainPanel);
+				
+				//adjusting the size and setting it visible
+				option5Frame.setSize(700, 250);
+				option5Frame.setVisible(true);
+				
+				option5Button.addActionListener(new ActionListener() {
+					
+					@Override
+					public void actionPerformed(ActionEvent e) {
+						//hiding the previous frame
+						option5Frame.setVisible(false);
+						//the result of the query window frame
+						JFrame option5ResultFrame = new JFrame("Result");
+						option5ResultFrame.setLayout(new GridLayout(2, 1));
+						frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+						
+						//get the input from the user
+						//*********String ID = inputID.getText();
+						//a label with records of the query
+						JLabel option5ResultLabel = new JLabel("test");
+						option5ResultLabel.setHorizontalAlignment(JLabel.CENTER);
+						
+						JButton option5ResultButton = new JButton("Finish");
+						JPanel option5ResultPanel = new JPanel();
+						option5ResultPanel.add(option5ResultButton);
+						//add the label to the window frame
+						option5ResultFrame.getContentPane().add(option5ResultLabel);
+						option5ResultFrame.getContentPane().add(option5ResultPanel);
+						
+						option5ResultButton.addActionListener(new ActionListener() {
+							
+							@Override
+							public void actionPerformed(ActionEvent e) {
+								//hiding the result frame window and showing the frame window with the alternatives
+								option5ResultFrame.setVisible(false);
+								frame.setVisible(true);
+							}
+						});
+						
+						//adjusting the size and setting it visible
+						option5ResultFrame.setSize(700, 250);
+						option5ResultFrame.setVisible(true);
+					}
+				});
 			}
 			//quit
 			else if(quit.isSelected()){
@@ -237,7 +511,7 @@ class test
 	frame.getContentPane().add(BorderLayout.PAGE_END,submitPanel);
 	
 	//the size of the frame window
-	frame.setSize(500, 250);
+	frame.setSize(700, 250);
 	//show the frame
 	frame.setVisible(true);
 
