@@ -145,7 +145,7 @@ class test
                             option2Frame.setVisible(false);
                             //the result of the query window frame
                             JFrame option2ResultFrame = new JFrame("Result");
-                            option2ResultFrame.setLayout(new GridLayout(2, 1));
+                            option2ResultFrame.setLayout(new GridLayout(0, 1));
                             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
                             //get the input from the user
@@ -153,20 +153,29 @@ class test
                             try{
                                 results = findByGenre(genre);
                             } catch (java.sql.SQLException sqle) {
-                                System.out.println("SQLEXCEPtion: " + sqle);
+                                System.out.println("SQLEXCEPTION: " + sqle);
                             }
 
-                            //a label with records of the query
-                            JLabel option2ResultLabel = new JLabel(results.get(0).get(1));
-                            option2ResultLabel.setHorizontalAlignment(JLabel.CENTER);
+                            String[][] resultsNames = new String[results.size()][1];
+                            String[] col = {"Book Name"};
+
+                            for(int i=0;i<results.size();i++){
+                                //storing the records into an array
+                                resultsNames[i][0] = (results.get(i).get(1));
+                            }
+
+                            //create a table with all the results and make it scrollable
+                            JTable tableResults = new JTable(resultsNames,col);
+                            JScrollPane scrollPane = new JScrollPane(tableResults);
+                            tableResults.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
 
                             JButton option2ResultButton = new JButton("Finish");
                             JPanel option2ResultPanel = new JPanel();
                             option2ResultPanel.add(option2ResultButton);
-                            //add the label to the window frame
-                            option2ResultFrame.getContentPane().add(option2ResultLabel);
+                            //add the panel and the scroll pane to the window frame
+                            option2ResultFrame.getContentPane().add(scrollPane);
                             option2ResultFrame.getContentPane().add(option2ResultPanel);
-
                             option2ResultButton.addActionListener(new ActionListener() {
 
                                 @Override
@@ -240,12 +249,10 @@ class test
                             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
                             //get the input from the user
-                            char[] ID = inputID.getText().toCharArray();
-                            for(char c : ID){
-                                if (!Character.isDigit(c)){
+                            String ID = inputID.getText();
 
-                                }
-                            }
+
+
                             //a label with records of the query
                             JLabel option3ResultLabel = new JLabel("");
                             option3ResultLabel.setHorizontalAlignment(JLabel.CENTER);
@@ -567,6 +574,69 @@ class test
 //        statement.close ( ) ;
 //        con.close ( ) ;
     }
+
+    static ArrayList<ArrayList<String>> updateCopyStatus(String res_id) throws SQLException {
+        // Querying the book table to find the book with the genrename = input
+
+        // This is the url you must use for DB2.
+        //Note: This url may not valid now !
+        String url = "jdbc:db2://comp421.cs.mcgill.ca:50000/cs421";
+        Connection con = DriverManager.getConnection (url,"cs421g32","32FourTimes") ;
+        Statement statement = con.createStatement ( );
+
+        // This is the url you must use for DB2.
+        //Note: This url may not valid now !
+
+        ArrayList<ArrayList<String>> results = new ArrayList<ArrayList<String>>();
+
+        try {
+            String querySQL = "SELECT BOOKS.ISBN,\n" +
+                    "BOOKS.BOOK_NAME,\n" +
+                    "\tBOOKS.RATING\n" +
+                    "FROM BOOKS\n" +
+                    "LEFT JOIN BOOKSGENRES ON BOOKS.ISBN=BOOKSGENRES.ISBN\n" +
+                    "WHERE BOOKSGENRES.GENRE_NAME = \'" + res_id + "\'\n" +
+                    "ORDER BY BOOKS.ISBN";
+
+//			System.out.println (querySQL) ;
+            java.sql.ResultSet rs = statement.executeQuery ( querySQL ) ;
+
+            while ( rs.next ( ) ) {
+                ArrayList<String> temp = new ArrayList<String>();
+
+                String id = rs.getString (1);
+                String name = rs.getString (2);
+                String rating = Integer.toString(rs.getInt ( 3 )) ;
+
+                temp.add(id);
+                temp.add(name);
+                temp.add(rating);
+
+//				System.out.println ("id:  " + id);
+//				System.out.println ("name:  " + name);
+//				System.out.println("rating: " + rating);
+
+                results.add(temp);
+            }
+
+            System.out.println ("DONE");
+        } catch (SQLException e) {
+
+            int sqlCode = e.getErrorCode(); // Get SQLCODE
+            String sqlState = e.getSQLState(); // Get SQLSTATE
+
+            // Your code to handle errors comes here;
+            // something more meaningful than a print would be good
+            System.out.println(e);
+            System.out.println("Code: " + sqlCode + "  sqlState: " + sqlState);
+        } finally {
+            // Finally but importantly close the statement and connection
+            statement.close ( ) ;
+            con.close ( ) ;
+        }
+
+        return results;
+    }
     static ArrayList<ArrayList<String>> findByGenre(String input) throws SQLException {
         // Querying the book table to find the book with the genrename = input
 
@@ -758,4 +828,13 @@ class test
         }
         return false;
     }
+    //check if an reservation_id is only int
+    public static boolean validateResID(String res_id){
+        char[] arr = res_id.toCharArray();
+        for(char c : arr){
+            if( Character.isAlphabetic(c)) return false;
+        }
+        return true;
+    }
+
 }
