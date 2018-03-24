@@ -337,7 +337,14 @@ class test
 
                             //get the input from the user
                             String ID = inputID.getText();
-                            //a label with records of the query
+
+							try {
+								ArrayList<String> result = returnBook(ID);
+							} catch (SQLException e1) {
+								e1.printStackTrace();
+							}
+							
+							//a label with records of the query
                             JLabel option4ResultLabel = new JLabel(ID);
                             option4ResultLabel.setHorizontalAlignment(JLabel.CENTER);
 
