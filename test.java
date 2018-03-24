@@ -245,12 +245,14 @@ class test
 						frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 						
 						//get the input from the user
-						char[] ID = inputID.getText().toCharArray();
-						for(char c : ID){
-							if (!Character.isDigit(c)){
-								
-							}
+						String ID = inputID.getText();
+
+						try {
+							ArrayList<String> results = returnBook(ID);
+						} catch (SQLException e1) {
+							e1.printStackTrace();
 						}
+
 						//a label with records of the query
 						JLabel option3ResultLabel = new JLabel("");
 						option3ResultLabel.setHorizontalAlignment(JLabel.CENTER);
@@ -555,9 +557,9 @@ class test
 				temp.add(name);
 				temp.add(rating);
 
-//				System.out.println ("id:  " + id);
-//				System.out.println ("name:  " + name);
-//				System.out.println("rating: " + rating);
+				System.out.println ("id:  " + id);
+				System.out.println ("name:  " + name);
+				System.out.println("rating: " + rating);
 
 				results.add(temp);
 			}
@@ -581,7 +583,7 @@ class test
 		return results;
 	}
 
-	static ArrayList<ArrayList<String>> returnBook(String input) throws SQLException {
+	static ArrayList<String> returnBook(String input) throws SQLException {
 		// Querying the book table to find the book with the genrename = input
 
 		// This is the url you must use for DB2.
@@ -593,7 +595,8 @@ class test
 		// This is the url you must use for DB2.
 		//Note: This url may not valid now !
 
-		ArrayList<ArrayList<String>> results = new ArrayList<ArrayList<String>>();
+		ArrayList<String> temp = new ArrayList<String>();
+		java.sql.ResultSet rs;
 
 		try {
 			String querySQL = "SELECT COPIES.ISBN,\n" +
@@ -602,65 +605,51 @@ class test
 					"\tCOPIES.STATUS\n" +
 					"FROM COPIES\n" +
 					"LEFT JOIN RESERVATIONS ON RESERVATIONS.ISBN=COPIES.ISBN AND RESERVATIONS.COPY_NO=COPIES.COPY_NO\n" +
-					"WHERE RESERVATIONS.RESERVATION_ID= " + input;
+					"WHERE RESERVATIONS.RESERVATION_ID = " + input;
 
 //			System.out.println (querySQL) ;
-			java.sql.ResultSet rs = statement.executeQuery ( querySQL ) ;
+			rs = statement.executeQuery ( querySQL ) ;
 
-			String id = "", copy_no = "", library_id = "", status = "";
+			String isbn = "", copy_no = "", library_id = "", status = "";
 
-			ArrayList<String> temp = new ArrayList<String>();
 
 			while ( rs.next ( ) ) {
 
-				id = rs.getString (1);
+				isbn = rs.getString (1);
 				copy_no = Integer.toString(rs.getInt ( 2 )) ;
 				library_id = Integer.toString(rs.getInt ( 3 )) ;
 				status = rs.getString (4);
 
-				temp.add(id);
+				temp.add(isbn);
 				temp.add(copy_no);
 				temp.add(library_id);
 				temp.add(status);
 
-				System.out.println ("id:  " + id);
+				System.out.println ("isbn:  " + isbn);
 				System.out.println ("copy_no:  " + copy_no);
 				System.out.println("library_id: " + library_id);
 				System.out.println("status: " + status);
 			}
 
-			statement = con.createStatement ( );
+			statement.close();
 
-//			if (status.equals("OUT")) {
-//				String querySQL = "UPDATE COPIES\n" +
-//						"SET STATUS= \'IN\' \n" +
-//						"WHERE COPY_ISBN={{input isbn}} AND COPY_NO={{input copy_no}}";
-//
-////			System.out.println (querySQL) ;
-//				java.sql.ResultSet rs = statement.executeQuery ( querySQL ) ;
-//
-//				String id = "", copy_no = "", library_id = "", status = "";
-//
-//				ArrayList<String> temp = new ArrayList<String>();
-//
-//				while ( rs.next ( ) ) {
-//
-//					id = rs.getString (1);
-//					copy_no = Integer.toString(rs.getInt ( 2 )) ;
-//					library_id = Integer.toString(rs.getInt ( 3 )) ;
-//					status = rs.getString (4);
-//
-//					temp.add(id);
-//					temp.add(copy_no);
-//					temp.add(library_id);
-//					temp.add(status);
-//
-//					System.out.println ("id:  " + id);
-//					System.out.println ("copy_no:  " + copy_no);
-//					System.out.println("library_id: " + library_id);
-//					System.out.println("status: " + status);
-//				}
-//			}
+
+			if (status.equals("OUT")) {
+
+				statement = con.createStatement ( );
+
+				querySQL = "UPDATE COPIES\n" +
+						"SET STATUS= \'IN\' \n" +
+						"WHERE COPY_ISBN = \'" + isbn + "\' AND COPY_NO = " + copy_no;
+
+				int done = statement.executeUpdate(querySQL);
+				if (done == 1) {
+					System.out.println ("CHANGED TO IN");
+				}
+
+				statement.close ( ) ;
+			}
+
 
 
 			System.out.println ("DONE");
@@ -675,10 +664,10 @@ class test
 			System.out.println("Code: " + sqlCode + "  sqlState: " + sqlState);
 		} finally {
 			// Finally but importantly close the statement and connection
-			statement.close ( ) ;
+
 			con.close ( ) ;
 		}
 
-		return results;
+		return temp;
 	}
 }
